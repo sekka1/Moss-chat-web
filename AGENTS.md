@@ -33,6 +33,54 @@ Moss-chat-web is a TypeScript web application.
 - Add or update tests for any code changes
 - Ensure test coverage is maintained or improved
 
+## Security Best Practices
+
+### OWASP Top 10 Compliance
+- **Injection Prevention**: Always sanitize and validate user inputs; use parameterized queries for database operations
+- **Authentication & Session Management**: Implement secure authentication; never store passwords in plain text; use industry-standard libraries
+- **XSS Prevention**: Sanitize all user-generated content before rendering; use Content Security Policy (CSP) headers
+- **Broken Access Control**: Implement proper authorization checks; verify user permissions on server-side
+- **Security Misconfiguration**: Keep all dependencies updated; remove default credentials and unnecessary features
+- **Vulnerable Dependencies**: Regularly audit dependencies with `npm audit`; address critical vulnerabilities promptly
+- **Insufficient Logging**: Log security-relevant events; never log sensitive data (passwords, tokens, personal information)
+
+### Input Validation & Sanitization
+- Validate all user inputs on both client and server side
+- Use allowlists rather than blocklists for validation
+- Sanitize data before rendering in HTML, SQL queries, or system commands
+- Implement rate limiting for API endpoints to prevent abuse
+- Validate file uploads: check file type, size, and content
+
+### Authentication & Authorization
+- Use secure session management and HTTP-only cookies
+- Implement multi-factor authentication where appropriate
+- Use bcrypt, argon2, or similar for password hashing (never MD5 or SHA1)
+- Implement proper CORS policies
+- Use JWT tokens securely with appropriate expiration times
+- Never expose authentication tokens in URLs or logs
+
+### Data Protection
+- Encrypt sensitive data at rest and in transit (use HTTPS/TLS)
+- Never commit secrets, API keys, credentials, or tokens to version control
+- Use environment variables for configuration secrets
+- Implement proper data retention and deletion policies
+- Follow principle of least privilege for data access
+
+### API Security
+- Implement proper authentication and authorization for all endpoints
+- Use HTTPS for all API communications
+- Validate and sanitize all API inputs
+- Implement rate limiting and throttling
+- Use API versioning and deprecation strategies
+- Never expose internal error details to clients
+
+### Code Security Practices
+- Avoid using `eval()`, `Function()`, or `setTimeout/setInterval` with strings
+- Be cautious with `innerHTML`; prefer `textContent` or use sanitization libraries
+- Implement Content Security Policy (CSP) headers
+- Use security headers: X-Frame-Options, X-Content-Type-Options, Strict-Transport-Security
+- Regular security audits and penetration testing
+
 ## Code Quality Standards
 
 ### TypeScript
@@ -46,6 +94,7 @@ Moss-chat-web is a TypeScript web application.
 - Maintain existing test patterns and conventions
 - Test edge cases and error conditions
 - Use descriptive test names that explain the expected behavior
+- Include security testing for authentication, authorization, and input validation
 
 ## PR Workflow
 
@@ -72,6 +121,10 @@ Moss-chat-web is a TypeScript web application.
 - Commit secrets, API keys, or sensitive data
 - Modify dependencies without justification
 - Make changes to generated or vendored files without proper understanding
+- Use `eval()` or execute dynamic code from user input
+- Store passwords or tokens in plain text
+- Expose sensitive error messages to end users
+- Disable security features or bypass security checks
 
 ### DO
 - Follow existing code patterns and conventions

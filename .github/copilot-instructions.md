@@ -122,6 +122,7 @@ describe('validateEmail', () => {
 - Handle errors at appropriate levels
 - Don't swallow errors silently
 - Log errors with sufficient context
+- Never expose sensitive information in error messages (stack traces, database details, credentials)
 
 ### Example: Good Error Handling
 ```typescript
@@ -140,6 +141,226 @@ function processUserData(data: unknown): User {
 }
 ```
 
+## Security Best Practices
+
+### Input Validation & Sanitization
+- **Always validate user input**: Never trust data from users, APIs, or external sources
+- **Use allowlists, not blocklists**: Define what is allowed rather than what is blocked
+- **Sanitize before use**: Clean data before rendering, storing, or processing
+- **Type validation**: Use TypeScript types and runtime validation libraries (e.g., Zod, Yup)
+- **Validate on both client and server**: Client-side validation for UX, server-side for security
+
+### Example: Input Validation
+```typescript
+import { z } from 'zod';
+
+const UserSchema = z.object({
+  email: z.string().email(),
+  age: z.number().min(0).max(150),
+  username: z.string().min(3).max(20).regex(/^[a-zA-Z0-9_]+$/),
+});
+
+/**
+ * Validates and processes user registration data
+ * @param data - Raw user input data
+ * @returns Validated user object
+ * @throws ValidationError if data is invalid
+ */
+function registerUser(data: unknown): User {
+  const validated = UserSchema.parse(data); // Throws if invalid
+  // Process validated data...
+}
+```
+
+### XSS Prevention
+- **Escape user content**: Always escape HTML, JavaScript, and CSS when rendering user data
+- **Use frameworks safely**: React auto-escapes by default, but be careful with `dangerouslySetInnerHTML`
+- **Content Security Policy**: Implement CSP headers to restrict resource loading
+- **Avoid `innerHTML`**: Prefer `textContent` or use DOMPurify for sanitization
+
+### Example: Safe Content Rendering
+```typescript
+// ❌ UNSAFE - vulnerable to XSS
+function UnsafeComponent({ userInput }: { userInput: string }) {
+  return <div dangerouslySetInnerHTML={{ __html: userInput }} />;
+}
+
+// ✅ SAFE - auto-escaped by React
+function SafeComponent({ userInput }: { userInput: string }) {
+  return <div>{userInput}</div>;
+}
+
+// ✅ SAFE - sanitized HTML when necessary
+import DOMPurify from 'dompurify';
+
+function SafeHtmlComponent({ html }: { html: string }) {
+  const sanitized = DOMPurify.sanitize(html);
+  return <div dangerouslySetInnerHTML={{ __html: sanitized }} />;
+}
+```
+
+### Authentication & Authorization
+- **Use secure authentication**: Implement OAuth2, JWT, or session-based auth with industry-standard libraries
+- **HTTP-only cookies**: Store session tokens in HTTP-only, secure cookies
+- **Password security**: Use bcrypt, argon2, or scrypt for password hashing (min 10 rounds)
+- **Token management**: Set appropriate expiration times; implement refresh tokens
+- **Never expose tokens**: Don't log tokens or include them in URLs or client-side storage insecurely
+
+### Example: Secure Password Hashing
+```typescript
+import bcrypt from 'bcrypt';
+
+const SALT_ROUNDS = 12;
+
+/**
+ * Securely hashes a password using bcrypt
+ * @param password - Plain text password
+ * @returns Hashed password
+ */
+async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, SALT_ROUNDS);
+}
+
+/**
+ * Verifies a password against a hash
+ * @param password - Plain text password to verify
+ * @param hash - Stored password hash
+ * @returns true if password matches
+ */
+async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
+```
+
+### SQL Injection Prevention
+- **Use parameterized queries**: Never concatenate user input into SQL queries
+- **Use ORMs safely**: Prefer query builders and ORMs (Prisma, TypeORM) with parameterized queries
+- **Validate input types**: Ensure IDs are numbers, emails are valid, etc.
+
+### Example: Safe Database Queries
+```typescript
+// ❌ UNSAFE - SQL injection vulnerability
+function getUserUnsafe(userId: string) {
+  return db.query(`SELECT * FROM users WHERE id = ${userId}`);
+}
+
+// ✅ SAFE - parameterized query
+function getUserSafe(userId: number) {
+  return db.query('SELECT * FROM users WHERE id = $1', [userId]);
+}
+
+// ✅ SAFE - ORM usage
+function getUserWithORM(userId: number) {
+  return prisma.user.findUnique({ where: { id: userId } });
+}
+```
+
+### API Security
+- **Authenticate all endpoints**: Verify user identity before processing requests
+- **Authorize access**: Check user permissions for each resource
+- **Rate limiting**: Prevent abuse with rate limiting (e.g., express-rate-limit)
+- **CORS configuration**: Only allow trusted origins
+- **Input validation**: Validate all request parameters, body, and headers
+- **HTTPS only**: Never send sensitive data over HTTP
+
+### Example: Secure API Endpoint
+```typescript
+/**
+ * Secure API endpoint with authentication, authorization, and validation
+ * @param req - Express request with authenticated user
+ * @param res - Express response
+ */
+async function updateUserProfile(req: AuthenticatedRequest, res: Response) {
+  // 1. Authentication (middleware ensures req.user exists)
+  if (!req.user) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  // 2. Authorization - users can only update their own profile
+  if (req.user.id !== parseInt(req.params.userId)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  // 3. Input validation
+  const UpdateSchema = z.object({
+    name: z.string().min(1).max(100),
+    bio: z.string().max(500).optional(),
+  });
+
+  try {
+    const validated = UpdateSchema.parse(req.body);
+    const updated = await updateUser(req.user.id, validated);
+    return res.json(updated);
+  } catch (error) {
+    // Don't expose internal errors
+    return res.status(400).json({ error: 'Invalid input' });
+  }
+}
+```
+
+### Secrets Management
+- **Never commit secrets**: No API keys, passwords, tokens, or credentials in code
+- **Use environment variables**: Store secrets in `.env` files (add to `.gitignore`)
+- **Use secret management**: Consider AWS Secrets Manager, HashiCorp Vault, or Azure Key Vault
+- **Rotate credentials**: Regularly update API keys and tokens
+- **Minimum privileges**: Grant least privilege access to services
+
+### Example: Environment Configuration
+```typescript
+// ❌ NEVER DO THIS
+const API_KEY = 'sk-1234567890abcdef'; // Hardcoded secret!
+
+// ✅ Use environment variables
+const API_KEY = process.env.API_KEY;
+
+if (!API_KEY) {
+  throw new Error('API_KEY environment variable is required');
+}
+```
+
+### Dependency Security
+- **Audit regularly**: Run `npm audit` or `pnpm audit` before each release
+- **Keep dependencies updated**: Use Dependabot or Renovate for automated updates
+- **Review updates**: Check changelogs before updating dependencies
+- **Minimal dependencies**: Only add necessary packages; fewer dependencies = smaller attack surface
+- **Verify packages**: Check package popularity, maintenance, and known vulnerabilities
+
+### Security Headers
+Implement these HTTP security headers:
+- `Content-Security-Policy`: Restrict resource loading
+- `X-Frame-Options: DENY`: Prevent clickjacking
+- `X-Content-Type-Options: nosniff`: Prevent MIME sniffing
+- `Strict-Transport-Security`: Enforce HTTPS
+- `X-XSS-Protection: 1; mode=block`: Enable XSS filtering (legacy browsers)
+- `Referrer-Policy: no-referrer-when-downgrade`: Control referrer information
+
+### Example: Security Headers (Express)
+```typescript
+import helmet from 'helmet';
+
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", 'data:', 'https:'],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+  },
+}));
+```
+
+### Logging & Monitoring
+- **Log security events**: Authentication attempts, authorization failures, input validation errors
+- **Never log secrets**: Passwords, tokens, API keys, or PII
+- **Sanitize logs**: Remove sensitive data before logging
+- **Monitor for anomalies**: Track failed login attempts, unusual access patterns
+- **Implement alerting**: Get notified of security-relevant events
+
 ## Code Quality Checklist
 
 Before suggesting code changes, ensure:
@@ -151,6 +372,10 @@ Before suggesting code changes, ensure:
 - [ ] Code follows existing patterns in the project
 - [ ] No hardcoded values (use constants or configuration)
 - [ ] Meaningful variable and function names
+- [ ] Input validation and sanitization implemented
+- [ ] No security vulnerabilities (XSS, SQL injection, etc.)
+- [ ] Secrets not hardcoded in code
+- [ ] Authentication and authorization properly implemented
 
 ## Prohibited Actions
 
@@ -163,6 +388,13 @@ Before suggesting code changes, ensure:
 - Use deprecated APIs or patterns
 - Introduce console.log statements (use proper logging)
 - Store secrets or API keys in code
+- Use `eval()`, `Function()`, or execute dynamic code from user input
+- Concatenate user input into SQL queries (use parameterized queries)
+- Render unsanitized user input as HTML (XSS vulnerability)
+- Store passwords in plain text or use weak hashing (MD5, SHA1)
+- Disable security features or CORS without justification
+- Expose sensitive error details to end users
+- Log passwords, tokens, API keys, or personal information
 
 ### AVOID
 - Deep nesting (more than 3 levels)
