@@ -1,8 +1,14 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
+import { KnowledgeService } from './knowledge-service';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Initialize knowledge service
+const knowledgeService = new KnowledgeService(
+  path.join(__dirname, '../data')
+);
 
 // Middleware
 app.use(express.json());
@@ -23,12 +29,21 @@ interface ChatResponse {
 }
 
 /**
- * Mock AI response handler
+ * Mock AI response handler with knowledge base integration
  * This is a placeholder for future GitHub Copilot SDK integration
+ * When a user asks a question, the system first searches the knowledge base
+ * for relevant context before generating a response
  * @param message - The user's input message
- * @returns A mock AI response
+ * @param context - Additional context from knowledge base
+ * @returns A mock AI response with context awareness
  */
-function getMockAIResponse(message: string): string {
+function getMockAIResponse(message: string, context: string): string {
+  const hasContext = context.length > 0;
+
+  if (hasContext) {
+    return `I found relevant information in the knowledge base about "${message}". ${context.substring(0, 200)}... (This is a mock response. The GitHub Copilot SDK integration will use this context to provide detailed answers.)`;
+  }
+
   const responses = [
     `You asked: "${message}". This is a mock response. The GitHub Copilot SDK integration will be added here.`,
     `Interesting question about "${message}"! I'm a placeholder response for now.`,
@@ -40,10 +55,11 @@ function getMockAIResponse(message: string): string {
 
 /**
  * POST endpoint to handle chat messages
+ * Pre-answer step: Search knowledge base for relevant context
  * @param req - Express request with chat message
  * @param res - Express response with AI response
  */
-app.post('/api/chat', (req: Request<object, ChatResponse, ChatMessage>, res: Response<ChatResponse>) => {
+app.post('/api/chat', async (req: Request<object, ChatResponse, ChatMessage>, res: Response<ChatResponse>) => {
   const { message } = req.body;
 
   if (!message || typeof message !== 'string') {
@@ -51,10 +67,25 @@ app.post('/api/chat', (req: Request<object, ChatResponse, ChatMessage>, res: Res
     return;
   }
 
-  // TODO: Replace with GitHub Copilot SDK integration
-  const aiResponse = getMockAIResponse(message);
+  try {
+    // Pre-answer step: Search knowledge base for relevant documents
+    const relevantDocs = await knowledgeService.search(message);
 
-  res.json({ response: aiResponse });
+    // Build context from knowledge base to enhance AI response
+    const context = relevantDocs.length > 0
+      ? relevantDocs.map(doc => `${doc.title}: ${doc.snippet}`).join('\n\n')
+      : '';
+
+    // TODO: Replace with GitHub Copilot SDK integration
+    // The context will be passed to the AI to provide more accurate answers
+    const aiResponse = getMockAIResponse(message, context);
+
+    res.json({ response: aiResponse });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Error processing chat message:', error);
+    res.status(500).json({ response: 'An error occurred processing your request' });
+  }
 });
 
 /**
