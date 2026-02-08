@@ -1,0 +1,271 @@
+# Moss Wall Glossary
+# Common terms and definitions related to moss walls
+
+terms:
+  - term: "Acrocarpous Moss"
+    definition: "Moss that grows upright in clumps or cushions, as opposed to spreading horizontally. Examples include mood moss and cushion moss."
+    related: ["Pleurocarpous Moss", "Mood Moss"]
+
+  - term: "Bryophyte"
+    definition: "The scientific classification that includes mosses, liverworts, and hornworts. Mosses are non-vascular plants that absorb water through their leaves."
+    related: ["Moss", "Non-vascular"]
+
+  - term: "Desiccation"
+    definition: "The process of drying out. Moss can tolerate periods of desiccation and revive when rehydrated, though prolonged dry periods can cause permanent damage."
+    related: ["Dormancy", "Rehydration"]
+
+  - term: "Dormancy"
+    definition: "A state of suspended growth that moss enters when conditions are unfavorable (too dry, too cold). Dormant moss may appear brown but can often recover."
+    related: ["Desiccation", "Revival"]
+
+  - term: "Humidity"
+    definition: "The amount of water vapor in the air, measured as a percentage. Most live moss walls thrive at 50-80% humidity."
+    related: ["Misting", "Hygrometer"]
+
+  - term: "Hygrometer"
+    definition: "A device used to measure humidity levels in the air. Essential for monitoring moss wall environments."
+    related: ["Humidity"]
+
+  - term: "Live Moss"
+    definition: "Moss that is actively growing and requires ongoing care including watering, proper lighting, and humidity. Contrasts with preserved moss."
+    related: ["Preserved Moss", "Sheet Moss"]
+
+  - term: "Misting"
+    definition: "The process of spraying fine water droplets onto moss to maintain hydration. The primary watering method for moss walls."
+    related: ["Humidity", "Watering"]
+
+  - term: "Mood Moss"
+    definition: "Dicranum scoparium, a clump-forming moss with a fuzzy, mounded appearance. Popular for adding texture and dimension to moss walls."
+    related: ["Acrocarpous Moss", "Sheet Moss"]
+
+  - term: "Pleurocarpous Moss"
+    definition: "Moss that grows horizontally in spreading carpets or sheets. Sheet moss and fern moss are pleurocarpous."
+    related: ["Acrocarpous Moss", "Sheet Moss"]
+
+  - term: "Preserved Moss"
+    definition: "Moss that has been treated with glycerin or other preservatives to maintain its appearance without watering. Not alive but retains color and texture."
+    related: ["Live Moss", "Reindeer Moss"]
+
+  - term: "Reindeer Moss"
+    definition: "Cladonia rangiferina, technically a lichen rather than true moss. Often preserved and dyed for decorative moss walls. Requires no maintenance when preserved."
+    related: ["Preserved Moss", "Lichen"]
+
+  - term: "Sheet Moss"
+    definition: "Hypnum species, a flat-growing moss that spreads in carpet-like sheets. One of the most popular choices for moss walls due to its lush appearance."
+    related: ["Pleurocarpous Moss", "Live Moss"]
+
+  - term: "Sphagnum Moss"
+    definition: "A genus of moss often used as a substrate or growing medium for other mosses. Excellent water retention makes it ideal for moss wall backing."
+    related: ["Substrate", "Live Moss"]
+
+  - term: "Substrate"
+    definition: "The underlying material or surface on which moss is attached and grows. Common substrates include sphagnum moss, cork, and mesh systems."
+    related: ["Sphagnum Moss", "Installation"]
+
+  - term: "Terrarium"
+    definition: "An enclosed or semi-enclosed glass container used to grow plants, including moss. The enclosure helps maintain humidity levels."
+    related: ["Humidity", "Live Moss"]
+
+  # Life Cycle & Reproduction Terms
+  - term: "Gametophyte"
+    definition: "The haploid (single chromosome set), green leafy phase of moss that produces male and female gametes. This is the dominant, visible form of moss."
+    related: ["Sporophyte", "Antheridia", "Archegonia"]
+
+  - term: "Sporophyte"
+    definition: "The diploid (double chromosome set) phase of moss that produces spores. It appears as a thin stalk with a capsule, attached to and dependent on the gametophyte."
+    related: ["Gametophyte", "Sporangium", "Spore"]
+
+  - term: "Antheridia"
+    definition: "Male reproductive organs of moss that produce motile sperm. Found on the gametophyte during the sexual reproduction phase."
+    related: ["Archegonia", "Gametophyte", "Sexual Reproduction"]
+
+  - term: "Archegonia"
+    definition: "Female reproductive organs of moss that contain eggs. Fertilization occurs when sperm swim through water to reach the archegonia."
+    related: ["Antheridia", "Gametophyte", "Sexual Reproduction"]
+
+  - term: "Protonema"
+    definition: "The filamentous, algae-like growth stage that develops immediately after spore germination. It eventually develops into the mature gametophyte."
+    related: ["Spore", "Gametophyte", "Germination"]
+
+  - term: "Sporangium"
+    definition: "The capsule at the top of the sporophyte where spores are produced through meiosis. Contains the operculum (lid) and sometimes a peristome."
+    related: ["Sporophyte", "Spore", "Operculum", "Peristome"]
+
+  - term: "Spore"
+    definition: "A haploid reproductive cell released from the sporangium that can germinate into a new moss plant when conditions are favorable."
+    related: ["Sporangium", "Protonema", "Germination"]
+
+  - term: "Operculum"
+    definition: "The lid of a moss sporangium that opens to release mature spores."
+    related: ["Sporangium", "Peristome"]
+
+  - term: "Peristome"
+    definition: "Teeth-like structures around the opening of some moss sporangia that regulate the gradual release of spores for wider dispersal."
+    related: ["Sporangium", "Operculum", "Spore"]
+
+  - term: "Fragmentation"
+    definition: "A method of asexual reproduction where a piece of the moss gametophyte breaks off and grows into a new, genetically identical plant. Common propagation technique for gardeners."
+    related: ["Asexual Reproduction", "Gemmae", "Propagation"]
+
+  - term: "Gemmae"
+    definition: "Small, multicellular reproductive structures produced by some mosses that can detach and grow into new, genetically identical plants."
+    related: ["Fragmentation", "Asexual Reproduction", "Gemmae Cups"]
+
+  - term: "Dioicous"
+    definition: "Moss species where male (antheridia) and female (archegonia) reproductive organs are found on separate individual plants."
+    related: ["Monoicous", "Antheridia", "Archegonia"]
+
+  - term: "Monoicous"
+    definition: "Moss species where both male (antheridia) and female (archegonia) reproductive organs are found on the same individual plant."
+    related: ["Dioicous", "Antheridia", "Archegonia"]
+
+  # Pest & Disease Terms
+  - term: "Neem Oil"
+    definition: "A natural pesticide derived from the neem tree, safe to use on moss for controlling spider mites and other small insects without harming the moss."
+    related: ["Spider Mites", "Natural Pest Control"]
+
+  - term: "Spider Mites"
+    definition: "Tiny arachnids that can infest moss, recognized by fine webbing and a dulling of moss color. Controlled with neem oil or introducing ladybugs."
+    related: ["Neem Oil", "Natural Pest Control"]
+
+  - term: "Natural Fungicide"
+    definition: "Organic treatments for fungal diseases on moss, including diluted apple cider vinegar, baking soda solution, or diluted hydrogen peroxide."
+    related: ["Fungal Disease", "Mold"]
+
+  - term: "Fungal Disease"
+    definition: "Infection in moss caused by fungi, appearing as white or brown fuzzy growth. Occurs in overly damp conditions with poor air circulation."
+    related: ["Natural Fungicide", "Mold", "Air Circulation"]
+
+  - term: "Shade Netting"
+    definition: "A mesh fabric used to protect moss from excessive direct sunlight, especially during hot summer months. Reduces light intensity while allowing airflow."
+    related: ["Environmental Stress", "Browning"]
+
+  - term: "Environmental Stress"
+    definition: "Conditions that cause moss to struggle, including too much sunlight, insufficient water, extreme temperatures, air pollution, or poor soil conditions."
+    related: ["Browning", "Dormancy", "Shade Netting"]
+
+  - term: "Browning"
+    definition: "Discoloration of moss from green to brown, often indicating dormancy due to environmental stress. Usually reversible with proper care adjustments."
+    related: ["Dormancy", "Environmental Stress", "Revival"]
+
+  - term: "Revival"
+    definition: "The process of bringing dormant or stressed moss back to healthy growth through proper watering, shade, and care."
+    related: ["Dormancy", "Browning", "Rehydration"]
+
+  - term: "Air Circulation"
+    definition: "The movement of air around moss plants. Good airflow prevents fungal diseases and mold, but too much wind can dry out moss."
+    related: ["Fungal Disease", "Mold"]
+
+  - term: "Geotextile"
+    definition: "A permeable fabric used as a weed barrier under moss. Prevents weed growth while allowing moisture through for the moss above."
+    related: ["Weed Control", "Substrate"]
+
+  - term: "pH Level"
+    definition: "A measure of acidity or alkalinity. Moss prefers slightly acidic conditions with a pH between 5.0 and 5.5."
+    related: ["Soil Conditions", "Growing Conditions"]
+
+  # Species-Specific Terms
+  - term: "Bryum Moss"
+    definition: "Bryum caespiticium, also called 'Sun Moss'. One of the few moss species that tolerates direct sunlight. Forms dense cushions and thrives in urban environments including pavement cracks."
+    related: ["Acrocarpous Moss", "Sun-Tolerant"]
+
+  - term: "Carpet Moss"
+    definition: "Hypnum cupressiforme, also called 'Cypress-leaved Plait-moss'. A widespread pleurocarpous moss forming soft, feathery mats on rocks, bark, and soil. Named for cypress-like curved leaves."
+    related: ["Pleurocarpous Moss", "Sheet Moss"]
+
+  - term: "Fern Moss"
+    definition: "Thuidium delicatulum, a delicate pleurocarpous moss with intricate fern-like branching. Requires high humidity and consistent moisture. Popular for terrariums."
+    related: ["Pleurocarpous Moss", "Terrarium"]
+
+  - term: "Haircap Moss"
+    definition: "Polytrichum commune, one of the tallest moss species (up to 20cm). Has primitive internal conducting cells. Named for hairy calyptra covering spore capsules. Prefers acidic, wet conditions."
+    related: ["Acrocarpous Moss", "Calyptra", "Peat Bog"]
+
+  - term: "Tree Moss"
+    definition: "Anomodon attenuatus, also called 'Tree Apron Moss' or 'Poodle Moss'. Grows in apron-like patterns around tree bases. Has strong holdfast system for bark attachment."
+    related: ["Pleurocarpous Moss", "Holdfast"]
+
+  # Water & Moisture Terms
+  - term: "Hyaline Cells"
+    definition: "Large, dead water-storage cells found in Sphagnum moss that can hold up to 20 times the moss's dry weight in water. Surrounded by smaller living photosynthetic cells."
+    related: ["Sphagnum Moss", "Water Retention"]
+
+  - term: "Wicking"
+    definition: "The process by which moss draws moisture from adjacent water sources through capillary action. Can help or harm moss depending on conditions."
+    related: ["Water Retention", "Moisture Level"]
+
+  - term: "Acclimation"
+    definition: "The process of newly transplanted moss adjusting to its new environment including altitude, sunlight, water availability, wind, and substrate. Precedes establishment."
+    related: ["Establishment", "Transplanting"]
+
+  - term: "Establishment"
+    definition: "The phase after acclimation when transplanted moss has reattached its rhizoids to the new substrate and begun normal growth."
+    related: ["Acclimation", "Rhizoids", "Transplanting"]
+
+  - term: "Chloramine"
+    definition: "A chemical disinfectant used in some municipal water supplies that can harm moss growth if present in high concentrations. Can be reduced by aging tap water."
+    related: ["Water Quality", "Rainwater"]
+
+  # Growth Terms
+  - term: "Holdfast"
+    definition: "Specialized structures that allow moss to attach firmly to substrates like tree bark. Particularly developed in species like Tree Moss (Anomodon attenuatus)."
+    related: ["Rhizoids", "Tree Moss", "Substrate"]
+
+  - term: "Calyptra"
+    definition: "A protective hood covering the developing sporophyte capsule. In Haircap Moss, it is distinctively hairy, giving the moss its common name."
+    related: ["Sporophyte", "Sporangium", "Haircap Moss"]
+
+  # Disease Terms
+  - term: "Black Slime Mold"
+    definition: "A mold that causes moss to turn black, commonly found near ponds or in constantly wet conditions. Spreads via water and water plants."
+    related: ["Gray Mold", "Mold", "Overwatering"]
+
+  - term: "Gray Mold"
+    definition: "A fungal infection causing moss to blacken, especially in warm (above 75°F), consistently moist conditions. Common in terrariums with poor ventilation."
+    related: ["Black Slime Mold", "Fungal Disease", "Terrarium"]
+
+  # Ecological Terms
+  - term: "Peat"
+    definition: "Partially decomposed organic matter, primarily from Sphagnum moss, that accumulates in waterlogged, acidic wetland conditions. Important for carbon sequestration."
+    related: ["Sphagnum Moss", "Peatland", "Carbon Sequestration"]
+
+  - term: "Peatland"
+    definition: "Wetland ecosystem dominated by peat-forming plants, especially Sphagnum moss. Stores approximately 30% of global soil carbon despite covering only 3% of land."
+    related: ["Peat", "Sphagnum Moss", "Carbon Sequestration"]
+
+  - term: "Carbon Sequestration"
+    definition: "The process of capturing and storing atmospheric carbon dioxide. Peatlands formed by Sphagnum moss are among the world's most important carbon sinks."
+    related: ["Peat", "Peatland", "Ecological Importance"]
+
+  - term: "Bioindicator"
+    definition: "An organism whose presence, absence, or condition indicates environmental quality. Moss serves as a bioindicator for air quality and ecosystem health."
+    related: ["Environmental Stress", "Ecological Importance"]
+
+  - term: "Microhabitat"
+    definition: "A small-scale habitat within a larger ecosystem that provides specific conditions for certain organisms. Moss creates microhabitats for invertebrates and microorganisms."
+    related: ["Biodiversity", "Ecological Importance"]
+
+  # Taxonomy Terms
+  - term: "Bryopsida"
+    definition: "The largest class of mosses, including most common species like Sheet Moss, Mood Moss, and Carpet Moss. Characterized by typical moss appearance with leafy gametophytes."
+    related: ["Bryophyte", "Sphagnopsida", "Polytrichopsida"]
+
+  - term: "Sphagnopsida"
+    definition: "A class of mosses containing only Sphagnum species. Distinguished by unique water-holding hyaline cells and ability to acidify their environment."
+    related: ["Sphagnum Moss", "Bryopsida", "Hyaline Cells"]
+
+  - term: "Polytrichopsida"
+    definition: "A class of mosses including Haircap Moss (Polytrichum). Distinguished by having primitive internal water-conducting cells similar to vascular plants."
+    related: ["Haircap Moss", "Bryopsida"]
+
+metadata:
+  last_updated: "2025-01-20"
+  total_terms: 63
+  categories:
+    - "Moss Types"
+    - "Care Terms"
+    - "Equipment"
+    - "Scientific Terms"
+    - "Life Cycle & Reproduction"
+    - "Pests & Diseases"
+    - "Environmental Factors"
