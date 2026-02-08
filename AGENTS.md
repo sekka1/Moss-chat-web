@@ -111,6 +111,7 @@ Moss-chat-web is a TypeScript web application.
 - Update documentation if changing functionality
 - Respond to review comments promptly
 - Ensure CI/CD checks pass before requesting review
+- **Always include screenshots for GUI changes**: When making changes to the user interface, take a screenshot of the change and include it in the pull request description to help reviewers visualize the modifications
 
 ## Boundaries and Restrictions
 
