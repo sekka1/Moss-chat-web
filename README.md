@@ -57,7 +57,7 @@ npm install
 npm run dev
 ```
 
-This starts the server using `ts-node` for hot-reloading during development.
+This starts the server using `ts-node` in development mode.
 
 ### Build the application
 
