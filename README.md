@@ -232,14 +232,43 @@ The main integration points are:
 
 ## CI/CD Pipeline
 
-The project includes a GitHub Actions workflow that automatically runs on every pull request:
+The project includes GitHub Actions workflows that automatically run on every pull request:
+
+### Lint and Build Workflow (`.github/workflows/lint-and-build.yml`)
 
 - **Linting**: Ensures code quality and TypeScript standards
 - **Building**: Verifies the application compiles successfully
-- **Testing**: Runs the test suite
+- **Testing**: Runs the unit test suite (uses mocks, no authentication required)
 - **Multi-version**: Tests against Node.js 18.x and 20.x
 
-The workflow is defined in `.github/workflows/lint-and-build.yml`.
+### Integration Test Workflow (`.github/workflows/integration-test.yml`)
+
+Runs integration tests with the real GitHub Copilot SDK to verify end-to-end functionality.
+
+**Requirements:**
+- Node.js 24.x or later (required by `@github/copilot-sdk@0.1.23`)
+- Tests against Node.js 24.x in CI
+
+**Required Setup:**
+
+To enable integration testing in GitHub Actions, you must configure a GitHub secret:
+
+1. **Create a Personal Access Token (PAT)**:
+   - Go to GitHub Settings → Developer Settings → Personal Access Tokens → Fine-grained tokens
+   - Click "Generate new token"
+   - Give it a descriptive name (e.g., "Copilot Integration Tests")
+   - Select your repository under "Repository access"
+   - Under "Permissions" → "Account permissions", add **"Copilot Requests: Read"**
+   - Generate and copy the token
+
+2. **Add the token as a repository secret**:
+   - Go to your repository → Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `COPILOT_TOKEN`
+   - Value: Paste the PAT you created
+   - Click "Add secret"
+
+The integration test workflow will use this token to authenticate with the GitHub Copilot SDK.
 
 ## Code Quality Standards
 
