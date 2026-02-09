@@ -6,16 +6,17 @@
  *
  * Requirements:
  * - Active GitHub Copilot subscription
- * - GitHub CLI authenticated (gh auth login)
- * - GitHub Copilot configured (gh copilot login)
+ * - Authentication via environment variable COPILOT_GITHUB_TOKEN (or GH_TOKEN/GITHUB_TOKEN)
+ *   with a Personal Access Token that has "Copilot Requests: Read" permission
  *
  * Usage:
  *   npm run test:integration
  *
  * This test will:
- * 1. Ask "what is a live moss wall?" to Copilot
- * 2. Verify we get a response
- * 3. Display the response for manual verification
+ * 1. Initialize Copilot SDK using environment variable authentication
+ * 2. Ask "what is a live moss wall?" to Copilot
+ * 3. Verify we get a response
+ * 4. Display the response for manual verification
  */
 
 import { CopilotClient } from '@github/copilot-sdk';
@@ -27,7 +28,9 @@ async function runIntegrationTest() {
 
   try {
     console.log('1. Initializing Copilot SDK...');
-    client = new CopilotClient();
+    // Disable use_logged_in_user to force SDK to use COPILOT_GITHUB_TOKEN env var
+    // This is necessary in CI/CD environments where GitHub CLI login is not available
+    client = new CopilotClient({ use_logged_in_user: false });
     await client.start();
     console.log('   ✓ Copilot SDK initialized successfully\n');
 
