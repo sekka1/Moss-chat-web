@@ -106,11 +106,41 @@ npm run lint:fix
 
 ### Run tests
 
+Run the automated unit tests:
+
 ```bash
 npm test
 ```
 
-Note: Test infrastructure is minimal at this stage. Tests will be expanded as the application grows.
+The unit tests use mocks and don't require GitHub Copilot authentication. They verify:
+- Copilot service initialization and shutdown
+- Response handling for "what is a live moss wall?" query
+- Context-aware responses with knowledge base integration
+- Streaming functionality
+
+#### Integration Testing with Real Copilot
+
+To test with the actual GitHub Copilot SDK (requires authentication):
+
+```bash
+npm run test:integration
+```
+
+**Requirements for integration testing:**
+- Active GitHub Copilot subscription
+- GitHub CLI authenticated (`gh auth login`)
+- GitHub Copilot configured (`gh copilot login`)
+
+The integration test will:
+1. Ask "what is a live moss wall?" to the real Copilot SDK
+2. Verify a valid response is received
+3. Display the response for manual verification
+
+**Additional test commands:**
+```bash
+npm run test:watch     # Run tests in watch mode
+npm run test:coverage  # Generate test coverage report
+```
 
 ## Application Usage
 
