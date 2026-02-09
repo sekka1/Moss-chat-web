@@ -122,8 +122,14 @@ The unit tests use mocks and don't require GitHub Copilot authentication. They v
 
 To test with the actual GitHub Copilot SDK (requires authentication):
 
+**Basic integration test** (tests simple Copilot responses):
 ```bash
 npm run test:integration
+```
+
+**Semantic search integration test** (tests the new document ranking flow):
+```bash
+npm run test:integration:semantic
 ```
 
 **Requirements for integration testing:**
@@ -131,10 +137,16 @@ npm run test:integration
 - GitHub CLI authenticated (`gh auth login`)
 - GitHub Copilot configured (`gh copilot login`)
 
-The integration test will:
+The basic integration test will:
 1. Ask "what is a live moss wall?" to the real Copilot SDK
 2. Verify a valid response is received
 3. Display the response for manual verification
+
+The semantic search integration test will:
+1. Test document ranking with sample documents
+2. Verify semantic understanding (watering queries, troubleshooting intent)
+3. Test integration with real knowledge base documents
+4. Validate edge cases (empty lists, single documents)
 
 **Additional test commands:**
 ```bash

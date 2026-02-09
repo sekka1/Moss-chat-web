@@ -12,7 +12,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:integration": "node src/copilot-integration.test.mjs"
+    "test:integration": "node src/copilot-integration.test.mjs",
+    "test:integration:semantic": "node src/copilot-semantic-search-integration.test.mjs"
   },
   "keywords": [
     "typescript",
