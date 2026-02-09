@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
 import { KnowledgeService } from './knowledge-service';
+import { CopilotService } from './copilot-service';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -9,6 +10,9 @@ const PORT = process.env.PORT || 3000;
 const knowledgeService = new KnowledgeService(
   path.join(__dirname, '../data')
 );
+
+// Initialize Copilot service
+const copilotService = new CopilotService();
 
 // Middleware
 app.use(express.json());
@@ -29,37 +33,23 @@ interface ChatResponse {
 }
 
 /**
- * Mock AI response handler with knowledge base integration
- * This is a placeholder for future GitHub Copilot SDK integration
- * When a user asks a question, the system first searches the knowledge base
- * for relevant context before generating a response
- * @param message - The user's input message
- * @param context - Additional context from knowledge base
- * @returns A mock AI response with context awareness
+ * Initialize Copilot service on startup
  */
-function getMockAIResponse(message: string, context: string): string {
-  const hasContext = context.length > 0;
-
-  if (hasContext) {
-    return `I found relevant information in the knowledge base about "${message}". ${context.substring(0, 200)}... (This is a mock response. The GitHub Copilot SDK integration will use this context to provide detailed answers.)`;
-  }
-
-  const responses = [
-    `You asked: "${message}". This is a mock response. The GitHub Copilot SDK integration will be added here.`,
-    `Interesting question about "${message}"! I'm a placeholder response for now.`,
-    `I received your message: "${message}". Real AI responses coming soon!`,
-  ];
-
-  return responses[Math.floor(Math.random() * responses.length)];
-}
+copilotService.initialize().catch((error) => {
+  // eslint-disable-next-line no-console
+  console.error('Warning: Copilot service failed to initialize:', error);
+  // eslint-disable-next-line no-console
+  console.log('Server will continue with fallback responses');
+});
 
 /**
- * POST endpoint to handle chat messages
+ * POST endpoint to handle chat messages with streaming support
  * Pre-answer step: Search knowledge base for relevant context
+ * Uses GitHub Copilot SDK to generate AI responses
  * @param req - Express request with chat message
- * @param res - Express response with AI response
+ * @param res - Express response with AI response (streaming or complete)
  */
-app.post('/api/chat', async (req: Request<object, ChatResponse, ChatMessage>, res: Response<ChatResponse>) => {
+app.post('/api/chat', async (req: Request<object, ChatResponse, ChatMessage>, res: Response) => {
   const { message } = req.body;
 
   if (!message || typeof message !== 'string') {
@@ -74,13 +64,23 @@ app.post('/api/chat', async (req: Request<object, ChatResponse, ChatMessage>, re
     // Build context from knowledge base to enhance AI response
     const context = relevantDocs.length > 0
       ? relevantDocs.map(doc => `${doc.title}: ${doc.snippet}`).join('\n\n')
-      : '';
+      : undefined;
 
-    // TODO: Replace with GitHub Copilot SDK integration
-    // The context will be passed to the AI to provide more accurate answers
-    const aiResponse = getMockAIResponse(message, context);
+    // Use GitHub Copilot SDK to generate response
+    try {
+      const aiResponse = await copilotService.getResponse(message, context);
+      res.json({ response: aiResponse });
+    } catch (copilotError) {
+      // Fallback to informative error message if Copilot fails
+      // eslint-disable-next-line no-console
+      console.error('Copilot SDK error:', copilotError);
 
-    res.json({ response: aiResponse });
+      const fallbackResponse = context
+        ? `I found relevant information in the knowledge base:\n\n${context.substring(0, 300)}...\n\nHowever, the AI service is currently unavailable. Please ensure GitHub Copilot is properly configured.`
+        : 'The AI service is currently unavailable. Please ensure GitHub Copilot is properly configured.';
+
+      res.json({ response: fallbackResponse });
+    }
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Error processing chat message:', error);
@@ -96,9 +96,83 @@ app.get('/api/health', (_req: Request, res: Response) => {
 });
 
 /**
+ * POST endpoint to handle chat messages with server-sent events (SSE) streaming
+ * This endpoint streams the AI response back in real-time
+ * @param req - Express request with chat message
+ * @param res - Express response with streaming AI response
+ */
+app.post('/api/chat/stream', async (req: Request<object, unknown, ChatMessage>, res: Response) => {
+  const { message } = req.body;
+
+  if (!message || typeof message !== 'string') {
+    res.status(400).json({ error: 'Invalid message format' });
+    return;
+  }
+
+  // Set headers for server-sent events
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  try {
+    // Pre-answer step: Search knowledge base for relevant documents
+    const relevantDocs = await knowledgeService.search(message);
+
+    // Build context from knowledge base to enhance AI response
+    const context = relevantDocs.length > 0
+      ? relevantDocs.map(doc => `${doc.title}: ${doc.snippet}`).join('\n\n')
+      : undefined;
+
+    // Stream response from Copilot
+    try {
+      await copilotService.streamResponse(message, context, (chunk: string) => {
+        res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+      });
+
+      res.write('data: [DONE]\n\n');
+      res.end();
+    } catch (copilotError) {
+      // eslint-disable-next-line no-console
+      console.error('Copilot streaming error:', copilotError);
+
+      const fallbackMessage = context
+        ? `I found relevant information in the knowledge base:\n\n${context.substring(0, 300)}...\n\nHowever, the AI service is currently unavailable.`
+        : 'The AI service is currently unavailable. Please ensure GitHub Copilot is properly configured.';
+
+      res.write(`data: ${JSON.stringify({ chunk: fallbackMessage })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    }
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Error processing streaming chat message:', error);
+    res.write(`data: ${JSON.stringify({ error: 'An error occurred processing your request' })}\n\n`);
+    res.end();
+  }
+});
+
+/**
  * Start the Express server
  */
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+/**
+ * Graceful shutdown handling
+ * Ensures Copilot client is properly closed on process termination
+ */
+process.on('SIGTERM', async () => {
+  // eslint-disable-next-line no-console
+  console.log('SIGTERM received, shutting down gracefully...');
+  await copilotService.shutdown();
+  process.exit(0);
+});
+
+process.on('SIGINT', async () => {
+  // eslint-disable-next-line no-console
+  console.log('SIGINT received, shutting down gracefully...');
+  await copilotService.shutdown();
+  process.exit(0);
 });
