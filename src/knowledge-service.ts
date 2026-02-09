@@ -1,5 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+import type { CopilotService } from './copilot-service';
 
 /**
  * Interface for knowledge documents
@@ -18,9 +19,11 @@ interface KnowledgeDocument {
 export class KnowledgeService {
   private dataDirectory: string;
   private documentCache: Map<string, KnowledgeDocument> = new Map();
+  private copilotService?: CopilotService;
 
-  constructor(dataDirectory: string) {
+  constructor(dataDirectory: string, copilotService?: CopilotService) {
     this.dataDirectory = dataDirectory;
+    this.copilotService = copilotService;
   }
 
   /**
@@ -68,6 +71,104 @@ export class KnowledgeService {
       // eslint-disable-next-line no-console
       console.error('Error searching knowledge base:', error);
       return [];
+    }
+  }
+
+  /**
+   * Search the knowledge base using Copilot for semantic relevance ranking
+   * This method provides better results than simple keyword matching by using
+   * GitHub Copilot SDK to understand semantic relevance
+   * @param query - The user's question or search terms
+   * @param maxCandidates - Maximum number of initial candidates to consider (default: 10)
+   * @param maxResults - Maximum number of results to return (default: 3)
+   * @returns Array of relevant documents sorted by semantic relevance
+   */
+  async searchWithCopilot(
+    query: string,
+    maxCandidates = 10,
+    maxResults = 3
+  ): Promise<KnowledgeDocument[]> {
+    // If Copilot service is not available, fall back to regular search
+    if (!this.copilotService) {
+      return this.search(query);
+    }
+
+    try {
+      // Step 1: Get initial candidates using keyword search
+      const queryTerms = query.toLowerCase().split(/\s+/);
+      const documents = await this.getAllDocuments();
+      const candidates: Array<KnowledgeDocument & { score: number }> = [];
+
+      for (const doc of documents) {
+        const contentLower = doc.content.toLowerCase();
+        const titleLower = doc.title.toLowerCase();
+
+        // Simple relevance scoring based on term matches
+        let score = 0;
+        for (const term of queryTerms) {
+          if (term.length < 3) continue; // Skip short words
+
+          if (titleLower.includes(term)) score += 10;
+          if (contentLower.includes(term)) {
+            const matches = (contentLower.match(new RegExp(term, 'g')) ?? []).length;
+            score += Math.min(matches, 5);
+          }
+        }
+
+        if (score > 0) {
+          candidates.push({
+            ...doc,
+            snippet: this.extractSnippet(doc.content, queryTerms),
+            score,
+          });
+        }
+      }
+
+      // If we have no candidates from keyword search, return all documents as candidates
+      if (candidates.length === 0) {
+        for (const doc of documents.slice(0, maxCandidates)) {
+          candidates.push({
+            ...doc,
+            snippet: this.extractSnippet(doc.content, queryTerms),
+            score: 0,
+          });
+        }
+      }
+
+      // Step 2: Sort by keyword score and take top candidates
+      const topCandidates = candidates
+        .sort((a, b) => b.score - a.score)
+        .slice(0, maxCandidates);
+
+      // If we have very few candidates, just return them
+      if (topCandidates.length <= maxResults) {
+        return topCandidates.map(({ score: _score, ...doc }) => doc);
+      }
+
+      // Step 3: Use Copilot to semantically rank the top candidates
+      const documentsToRank = topCandidates.map(doc => ({
+        title: doc.title,
+        snippet: doc.snippet || '',
+      }));
+
+      const ranking = await this.copilotService.rankDocumentsByRelevance(
+        query,
+        documentsToRank
+      );
+
+      // Step 4: Reorder candidates based on Copilot's ranking and return top results
+      const reorderedResults = ranking
+        .map(idx => topCandidates[idx])
+        .filter(doc => doc !== undefined)
+        .slice(0, maxResults)
+        .map(({ score: _score, ...doc }) => doc);
+
+      return reorderedResults;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error searching with Copilot:', error);
+      // Fall back to regular search on error
+      return this.search(query);
     }
   }
 
