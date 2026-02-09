@@ -1,12 +1,14 @@
 # Moss-chat-web
 
-A minimal TypeScript web application built with Express.js that provides an AI chat interface. This application serves as a foundation for integrating AI chat capabilities, currently using mock responses with plans to integrate the GitHub Copilot SDK.
+A minimal TypeScript web application built with Express.js that provides an AI chat interface powered by the GitHub Copilot SDK. This application integrates with GitHub Copilot to provide intelligent responses, enhanced with a local knowledge base for context-aware answers.
 
 ## Features
 
 - **Express.js Server**: Minimal TypeScript-based Express.js server
 - **AI Chat Interface**: Clean, dark-themed chat interface
-- **Mock AI Responses**: Placeholder responses ready for GitHub Copilot SDK integration
+- **GitHub Copilot SDK Integration**: Powered by GitHub Copilot for intelligent AI responses
+- **Knowledge Base Integration**: Searches local knowledge base to provide context-aware answers
+- **Streaming Responses**: Real-time streaming of AI responses via Server-Sent Events (SSE)
 - **TypeScript**: Strict type safety throughout the application
 - **Linting**: ESLint configured for TypeScript
 - **CI/CD**: GitHub Actions workflow for automated testing and building
@@ -16,23 +18,27 @@ A minimal TypeScript web application built with Express.js that provides an AI c
 ```
 moss-chat-web/
 ├── src/
-│   └── server.ts          # Express server with API endpoints
+│   ├── server.ts              # Express server with API endpoints
+│   ├── copilot-service.ts     # GitHub Copilot SDK wrapper
+│   └── knowledge-service.ts   # Knowledge base search service
 ├── public/
-│   └── index.html         # Chat interface UI
+│   └── index.html             # Chat interface UI
+├── data/                      # Knowledge base documents
 ├── .github/
 │   └── workflows/
 │       └── lint-and-build.yml  # CI/CD pipeline
-├── dist/                  # Compiled JavaScript (generated)
-├── package.json           # Dependencies and scripts
-├── tsconfig.json          # TypeScript configuration
-├── .eslintrc.json         # ESLint configuration
-└── README.md              # This file
+├── dist/                      # Compiled JavaScript (generated)
+├── package.json               # Dependencies and scripts
+├── tsconfig.json              # TypeScript configuration
+├── .eslintrc.json             # ESLint configuration
+└── README.md                  # This file
 ```
 
 ## Prerequisites
 
 - Node.js >= 18.0.0
 - npm, pnpm, or yarn
+- GitHub Copilot subscription and CLI configured (required for AI functionality)
 
 ## Setup
 
@@ -48,6 +54,17 @@ cd Moss-chat-web
 ```bash
 npm install
 ```
+
+### 3. Configure GitHub Copilot
+
+Ensure you have GitHub Copilot CLI installed and authenticated:
+
+```bash
+# Login to GitHub Copilot (if not already logged in)
+gh copilot login
+```
+
+Note: The application requires an active GitHub Copilot subscription. If Copilot is not available, the application will provide fallback responses with knowledge base context.
 
 ## Development
 
@@ -89,11 +106,41 @@ npm run lint:fix
 
 ### Run tests
 
+Run the automated unit tests:
+
 ```bash
 npm test
 ```
 
-Note: Test infrastructure is minimal at this stage. Tests will be expanded as the application grows.
+The unit tests use mocks and don't require GitHub Copilot authentication. They verify:
+- Copilot service initialization and shutdown
+- Response handling for "what is a live moss wall?" query
+- Context-aware responses with knowledge base integration
+- Streaming functionality
+
+#### Integration Testing with Real Copilot
+
+To test with the actual GitHub Copilot SDK (requires authentication):
+
+```bash
+npm run test:integration
+```
+
+**Requirements for integration testing:**
+- Active GitHub Copilot subscription
+- GitHub CLI authenticated (`gh auth login`)
+- GitHub Copilot configured (`gh copilot login`)
+
+The integration test will:
+1. Ask "what is a live moss wall?" to the real Copilot SDK
+2. Verify a valid response is received
+3. Display the response for manual verification
+
+**Additional test commands:**
+```bash
+npm run test:watch     # Run tests in watch mode
+npm run test:coverage  # Generate test coverage report
+```
 
 ## Application Usage
 
@@ -103,13 +150,13 @@ Note: Test infrastructure is minimal at this stage. Tests will be expanded as th
    - **Top area**: Displays AI responses and chat history
    - **Bottom area**: Input box for typing questions
 4. Type a question and press Enter or click Send
-5. The application will display a mock AI response
+5. The application will use GitHub Copilot SDK to generate intelligent responses, enhanced with relevant information from the knowledge base
 
 ## API Endpoints
 
 ### POST /api/chat
 
-Send a message to the AI assistant.
+Send a message to the AI assistant and receive a complete response.
 
 **Request:**
 ```json
@@ -121,8 +168,28 @@ Send a message to the AI assistant.
 **Response:**
 ```json
 {
-  "response": "AI response here"
+  "response": "AI response generated by GitHub Copilot SDK"
 }
+```
+
+### POST /api/chat/stream
+
+Send a message and receive a streaming response via Server-Sent Events (SSE).
+
+**Request:**
+```json
+{
+  "message": "Your question here"
+}
+```
+
+**Response:** Server-Sent Events stream with chunks:
+```
+data: {"chunk":"AI response chunk"}
+
+data: {"chunk":"more response..."}
+
+data: [DONE]
 ```
 
 ### GET /api/health
@@ -136,17 +203,32 @@ Health check endpoint to verify the server is running.
 }
 ```
 
-## Future Integration: GitHub Copilot SDK
+## GitHub Copilot SDK Integration
 
-The application is structured to easily integrate the GitHub Copilot SDK. The mock response handler in `src/server.ts` (function `getMockAIResponse`) is the designated place for this integration:
+This application uses the [GitHub Copilot SDK](https://github.com/github/copilot-sdk) to provide intelligent AI responses. The integration includes:
 
-```typescript
-// Current mock implementation
-function getMockAIResponse(message: string): string {
-  // TODO: Replace with GitHub Copilot SDK integration
-  return "Mock response";
-}
-```
+- **Context-Aware Responses**: Searches the local knowledge base before generating responses to provide more accurate, context-specific answers
+- **Streaming Support**: Real-time streaming of responses via Server-Sent Events
+- **Model Selection**: Uses GPT-4.1 for high-quality responses
+- **Graceful Fallback**: Provides informative fallback responses if Copilot is unavailable
+
+### Documentation Resources
+
+- [GitHub Copilot SDK Documentation](https://github.com/github/copilot-sdk)
+- [Node.js Integration Guide](https://github.com/github/awesome-copilot/blob/main/cookbook/copilot-sdk/nodejs/README.md)
+- [Copilot SDK Cookbook](https://github.com/github/awesome-copilot/tree/main/cookbook/copilot-sdk)
+
+### How It Works
+
+1. **User Question**: User sends a question via the chat interface
+2. **Knowledge Base Search**: The system searches the local `data/` directory for relevant documents
+3. **Context Enhancement**: Relevant document snippets are included as context
+4. **Copilot Generation**: The GitHub Copilot SDK generates a response using the question and context
+5. **Response Display**: The response is returned to the user (streamed or complete)
+
+The main integration points are:
+- `src/copilot-service.ts`: Wrapper for GitHub Copilot SDK with initialization and session management
+- `src/server.ts`: API endpoints that combine knowledge base search with Copilot responses
 
 ## CI/CD Pipeline
 
@@ -209,6 +291,7 @@ MIT
 ## Environment Variables
 
 - `PORT`: Server port (default: 3000)
+- GitHub Copilot authentication is handled via the GitHub CLI (`gh copilot login`)
 
 ## Security
 
