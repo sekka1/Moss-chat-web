@@ -1,0 +1,71 @@
+name: Integration Tests
+
+on:
+  pull_request:
+    branches: ['**']
+  push:
+    branches: ['main']
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install GitHub Copilot CLI
+        run: |
+          # Install Copilot CLI using official installation script
+          curl -fsSL https://github.com/cli/cli/releases/download/v2.63.2/gh_2.63.2_linux_amd64.tar.gz -o gh.tar.gz
+          tar -xzf gh.tar.gz
+          sudo mv gh_2.63.2_linux_amd64/bin/gh /usr/local/bin/
+          rm -rf gh.tar.gz gh_2.63.2_linux_amd64
+
+          # Verify gh is installed
+          gh --version
+
+          # Install Copilot CLI extension
+          gh extension install github/gh-copilot || true
+
+      - name: Run integration tests
+        env:
+          # Authentication for GitHub Copilot SDK
+          # The SDK checks these environment variables in order:
+          # 1. COPILOT_GITHUB_TOKEN (highest priority, recommended)
+          # 2. GH_TOKEN (GitHub CLI compatible)
+          # 3. GITHUB_TOKEN (lowest priority)
+          #
+          # IMPORTANT: The default GITHUB_TOKEN does NOT have Copilot permissions.
+          # You must create a Personal Access Token (PAT) with "Copilot Requests: Read" permission.
+          #
+          # To set up:
+          # 1. Go to GitHub Settings > Developer Settings > Personal Access Tokens > Fine-grained tokens
+          # 2. Create a new token with "Copilot Requests: Read" permission
+          # 3. Add the token as a repository secret named COPILOT_TOKEN
+          # 4. Reference it here as shown below
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_TOKEN }}
+        run: npm run test:integration
+
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results-${{ matrix.node-version }}
+          path: |
+            *.log
+            npm-debug.log*
+          retention-days: 7
