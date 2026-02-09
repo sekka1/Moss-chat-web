@@ -245,6 +245,10 @@ The project includes GitHub Actions workflows that automatically run on every pu
 
 Runs integration tests with the real GitHub Copilot SDK to verify end-to-end functionality.
 
+**Requirements:**
+- Node.js 24.x or later (required by `@github/copilot-sdk@0.1.23`)
+- Tests against Node.js 24.x in CI
+
 **Required Setup:**
 
 To enable integration testing in GitHub Actions, you must configure a GitHub secret:

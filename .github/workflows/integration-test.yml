@@ -12,7 +12,9 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        # Note: Using Node.js 24.x because @github/copilot-sdk@0.1.23 requires Node >= 24.0.0
+        # The rest of the project supports Node >= 18.0.0 for development and unit tests
+        node-version: [24.x]
 
     steps:
       - name: Checkout code
