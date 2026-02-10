@@ -241,7 +241,7 @@ This application uses the [GitHub Copilot SDK](https://github.com/github/copilot
 6. **Response Display**: The response is returned to the user (streamed or complete)
 
 This two-stage approach combines the speed of keyword search with the semantic understanding of AI:
-- **Stage 1**: Fast keyword filtering to narrow down candidates (handles typos, exact matches)
+- **Stage 1**: Fast keyword filtering on lowercased text to narrow down candidates (exact and substring matches)
 - **Stage 2**: Semantic ranking by Copilot SDK to select truly relevant documents (understands synonyms, intent, context)
 
 The result is better document selection that can:
