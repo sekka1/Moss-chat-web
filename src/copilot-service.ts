@@ -124,15 +124,14 @@ export class CopilotService {
     query: string,
     documents: Array<{ title: string; snippet: string }>
   ): Promise<number[]> {
-    if (!this.client || !this.isInitialized) {
-      await this.initialize();
-    }
-
-    if (!this.client) {
-      throw new Error('Copilot client is not initialized');
-    }
-
     try {
+      if (!this.client || !this.isInitialized) {
+        await this.initialize();
+      }
+
+      if (!this.client) {
+        throw new Error('Copilot client is not initialized');
+      }
       // Build a prompt asking Copilot to rank documents by relevance
       const documentsList = documents
         .map((doc, idx) => `[${idx}] Title: ${doc.title}\nSnippet: ${doc.snippet}`)
