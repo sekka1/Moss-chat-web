@@ -2,12 +2,16 @@
 
 > Source: https://www.wikihow.com/Grow-Moss-Indoors
 > Scraped: 2026-02-10
+> Note: Content manually extracted. Images available at source URL but not downloaded.
+> For future scraping with image support, use `.github/skills/web-content-scraper/`
 
 ---
 
 ## Introduction
 
 Build your own indoor moss garden with this handy guide. Moss is an incredibly resilient and versatile plant, and it's super easy to grow indoors. By creating a damp, well-lit area with high humidity, you can grow moss in your home in no time.
+
+*Note: This article includes step-by-step images at the [source URL](https://www.wikihow.com/Grow-Moss-Indoors). Each method step has an accompanying illustration showing the technique described.*
 
 ---
 
