@@ -84,7 +84,7 @@ Return format: Just the numbers separated by commas (e.g., "2,0,4,1")
    - Extract relevant snippets around matched terms
 
 2. Sort by keyword score and select top N candidates (default: 10)
-   - If no keyword matches, use all documents as candidates
+   - If no keyword matches, use up to N documents (default: 10) from the full collection as fallback candidates
 
 3. If candidates ≤ desired results, return them immediately
 
