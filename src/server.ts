@@ -6,13 +6,14 @@ import { CopilotService } from './copilot-service';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Initialize knowledge service
-const knowledgeService = new KnowledgeService(
-  path.join(__dirname, '../data')
-);
-
 // Initialize Copilot service
 const copilotService = new CopilotService();
+
+// Initialize knowledge service with Copilot service for enhanced semantic search
+const knowledgeService = new KnowledgeService(
+  path.join(__dirname, '../data'),
+  copilotService
+);
 
 // Middleware
 app.use(express.json());
@@ -58,8 +59,9 @@ app.post('/api/chat', async (req: Request<object, ChatResponse, ChatMessage>, re
   }
 
   try {
-    // Pre-answer step: Search knowledge base for relevant documents
-    const relevantDocs = await knowledgeService.search(message);
+    // Pre-answer step: Search knowledge base for relevant documents using Copilot-enhanced search
+    // This provides better semantic relevance than simple keyword matching
+    const relevantDocs = await knowledgeService.searchWithCopilot(message);
 
     // Build context from knowledge base to enhance AI response
     const context = relevantDocs.length > 0
@@ -115,8 +117,9 @@ app.post('/api/chat/stream', async (req: Request<object, unknown, ChatMessage>, 
   res.setHeader('Connection', 'keep-alive');
 
   try {
-    // Pre-answer step: Search knowledge base for relevant documents
-    const relevantDocs = await knowledgeService.search(message);
+    // Pre-answer step: Search knowledge base for relevant documents using Copilot-enhanced search
+    // This provides better semantic relevance than simple keyword matching
+    const relevantDocs = await knowledgeService.searchWithCopilot(message);
 
     // Build context from knowledge base to enhance AI response
     const context = relevantDocs.length > 0

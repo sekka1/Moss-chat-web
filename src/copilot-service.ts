@@ -115,6 +115,89 @@ export class CopilotService {
   }
 
   /**
+   * Evaluates document relevance using Copilot's semantic understanding
+   * @param query - The user's question
+   * @param documents - Array of document summaries to evaluate
+   * @returns Array of document indices ranked by relevance (most relevant first)
+   */
+  async rankDocumentsByRelevance(
+    query: string,
+    documents: Array<{ title: string; snippet: string }>
+  ): Promise<number[]> {
+    try {
+      if (!this.client || !this.isInitialized) {
+        await this.initialize();
+      }
+
+      if (!this.client) {
+        throw new Error('Copilot client is not initialized');
+      }
+      // Build a prompt asking Copilot to rank documents by relevance
+      const documentsList = documents
+        .map((doc, idx) => `[${idx}] Title: ${doc.title}\nSnippet: ${doc.snippet}`)
+        .join('\n\n');
+
+      const prompt = `Given the following user question and a list of documents, identify which documents are most relevant to answering the question. Return ONLY the document numbers in order of relevance (most relevant first), as a comma-separated list of numbers.
+
+User Question: "${query}"
+
+Documents:
+${documentsList}
+
+Return format: Just the numbers separated by commas (e.g., "2,0,4,1")
+Your response:`;
+
+      // Create a session with GPT-4
+      const session = await this.client.createSession({ model: 'gpt-4.1' });
+
+      // Send prompt and wait for response
+      const response = await session.sendAndWait({ prompt });
+
+      // Extract and parse the ranking
+      if (response?.data?.content) {
+        const ranking = this.parseRanking(response.data.content, documents.length);
+        return ranking;
+      }
+
+      // Fallback: return original order if parsing fails
+      return Array.from({ length: documents.length }, (_, i) => i);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error ranking documents with Copilot:', error);
+      // Fallback: return original order on error
+      return Array.from({ length: documents.length }, (_, i) => i);
+    }
+  }
+
+  /**
+   * Parses ranking response from Copilot
+   * @param content - Response content from Copilot
+   * @param documentCount - Total number of documents
+   * @returns Array of document indices
+   */
+  private parseRanking(content: string, documentCount: number): number[] {
+    try {
+      // Extract numbers from the response
+      const numbers = content
+        .match(/\d+/g)
+        ?.map(num => parseInt(num, 10))
+        .filter(num => num >= 0 && num < documentCount) || [];
+
+      // Remove duplicates while preserving order
+      const uniqueNumbers = Array.from(new Set(numbers));
+
+      // Add any missing indices at the end (in original order)
+      const missingIndices = Array.from({ length: documentCount }, (_, i) => i)
+        .filter(i => !uniqueNumbers.includes(i));
+
+      return [...uniqueNumbers, ...missingIndices];
+    } catch {
+      // Fallback: return original order
+      return Array.from({ length: documentCount }, (_, i) => i);
+    }
+  }
+
+  /**
    * Shuts down the Copilot client
    */
   async shutdown(): Promise<void> {

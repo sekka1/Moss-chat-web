@@ -122,8 +122,14 @@ The unit tests use mocks and don't require GitHub Copilot authentication. They v
 
 To test with the actual GitHub Copilot SDK (requires authentication):
 
+**Basic integration test** (tests simple Copilot responses):
 ```bash
 npm run test:integration
+```
+
+**Semantic search integration test** (tests the new document ranking flow):
+```bash
+npm run test:integration:semantic
 ```
 
 **Requirements for integration testing:**
@@ -131,10 +137,16 @@ npm run test:integration
 - GitHub CLI authenticated (`gh auth login`)
 - GitHub Copilot configured (`gh copilot login`)
 
-The integration test will:
+The basic integration test will:
 1. Ask "what is a live moss wall?" to the real Copilot SDK
 2. Verify a valid response is received
 3. Display the response for manual verification
+
+The semantic search integration test will:
+1. Test document ranking with sample documents
+2. Verify semantic understanding (watering queries, troubleshooting intent)
+3. Test integration with real knowledge base documents
+4. Validate edge cases (empty lists, single documents)
 
 **Additional test commands:**
 ```bash
@@ -207,6 +219,7 @@ Health check endpoint to verify the server is running.
 
 This application uses the [GitHub Copilot SDK](https://github.com/github/copilot-sdk) to provide intelligent AI responses. The integration includes:
 
+- **Semantic Document Ranking**: Uses GitHub Copilot SDK to evaluate which documents from the knowledge base are most relevant to user questions, going beyond simple keyword matching
 - **Context-Aware Responses**: Searches the local knowledge base before generating responses to provide more accurate, context-specific answers
 - **Streaming Support**: Real-time streaming of responses via Server-Sent Events
 - **Model Selection**: Uses GPT-4.1 for high-quality responses
@@ -221,13 +234,24 @@ This application uses the [GitHub Copilot SDK](https://github.com/github/copilot
 ### How It Works
 
 1. **User Question**: User sends a question via the chat interface
-2. **Knowledge Base Search**: The system searches the local `data/` directory for relevant documents
-3. **Context Enhancement**: Relevant document snippets are included as context
-4. **Copilot Generation**: The GitHub Copilot SDK generates a response using the question and context
-5. **Response Display**: The response is returned to the user (streamed or complete)
+2. **Initial Keyword Search**: The system performs a fast keyword search on the local `data/` directory to identify candidate documents
+3. **Semantic Ranking**: GitHub Copilot SDK evaluates the candidates and ranks them by semantic relevance to the question
+4. **Context Enhancement**: The most relevant document snippets are included as context
+5. **Copilot Generation**: The GitHub Copilot SDK generates a response using the question and context
+6. **Response Display**: The response is returned to the user (streamed or complete)
+
+This two-stage approach combines the speed of keyword search with the semantic understanding of AI:
+- **Stage 1**: Fast keyword filtering on lowercased text to narrow down candidates (exact and substring matches)
+- **Stage 2**: Semantic ranking by Copilot SDK to select truly relevant documents (understands synonyms, intent, context)
+
+The result is better document selection that can:
+- Find documents even when different terminology is used
+- Understand the intent behind questions
+- Rank by true relevance rather than just keyword frequency
 
 The main integration points are:
-- `src/copilot-service.ts`: Wrapper for GitHub Copilot SDK with initialization and session management
+- `src/copilot-service.ts`: Wrapper for GitHub Copilot SDK with initialization, session management, and document ranking
+- `src/knowledge-service.ts`: Implements both simple keyword search and Copilot-enhanced semantic search
 - `src/server.ts`: API endpoints that combine knowledge base search with Copilot responses
 
 ## CI/CD Pipeline
