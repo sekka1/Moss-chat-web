@@ -30,3 +30,9 @@ Quick check - what does this return?
 node -v
 npm -v
 ```
+
+## Install Github Copilot SDK 
+
+```
+sudo npm install -g @github/copilot
+```

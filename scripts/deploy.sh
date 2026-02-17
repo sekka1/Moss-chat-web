@@ -130,12 +130,12 @@ if [[ "$CI_MODE" == true ]]; then
     --exclude '.git' \
     --exclude 'screenshots' \
     --exclude '*.log' \
-    dist/ \
+    dist \
     package.json \
     package-lock.json \
     ecosystem.config.js \
-    public/ \
-    data/ \
+    public \
+    data \
     $SERVER:$REMOTE_DIR/
 else
   rsync -avz --delete \
@@ -143,12 +143,12 @@ else
     --exclude '.git' \
     --exclude 'screenshots' \
     --exclude '*.log' \
-    dist/ \
+    dist \
     package.json \
     package-lock.json \
     ecosystem.config.js \
-    public/ \
-    data/ \
+    public \
+    data \
     $SERVER:$REMOTE_DIR/
 fi
 
