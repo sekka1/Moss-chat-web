@@ -18,6 +18,7 @@ module.exports = {
   testTimeout: 30000, // 30 seconds for integration tests
   moduleNameMapper: {
     '^@github/copilot-sdk$': '<rootDir>/node_modules/@github/copilot-sdk',
+    '^(\\.\\.?/.*)\\.js$': '$1',
   },
   transformIgnorePatterns: [
     'node_modules/(?!(@github/copilot-sdk)/)',
