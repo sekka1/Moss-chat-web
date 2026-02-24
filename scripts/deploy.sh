@@ -15,7 +15,7 @@ set -e  # Exit on any error
 
 # Configuration
 SERVER_USER="bitnami"
-SERVER_HOST="54.161.78.100"
+SERVER_HOST="3.220.214.231"
 SERVER="${SERVER_USER}@${SERVER_HOST}"
 REMOTE_DIR="/opt/bitnami/apps/moss-chat"
 APP_NAME="moss-chat"
