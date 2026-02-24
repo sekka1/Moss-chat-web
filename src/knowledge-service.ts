@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import type { CopilotService } from './copilot-service';
+import type { CopilotService } from './copilot-service.js';
 
 /**
  * Interface for knowledge documents

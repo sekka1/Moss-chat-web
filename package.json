@@ -2,6 +2,7 @@
   "name": "moss-chat-web",
   "version": "1.0.0",
   "description": "A minimal TypeScript web application with Express.js for AI chat interface",
+  "type": "module",
   "main": "dist/server.js",
   "scripts": {
     "build": "tsc",

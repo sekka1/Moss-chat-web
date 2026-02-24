@@ -1,7 +1,11 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
-import { KnowledgeService } from './knowledge-service';
-import { CopilotService } from './copilot-service';
+import { fileURLToPath } from 'url';
+import { KnowledgeService } from './knowledge-service.js';
+import { CopilotService } from './copilot-service.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;

@@ -136,7 +136,7 @@ if [[ "$CI_MODE" == true ]]; then
     dist \
     package.json \
     package-lock.json \
-    ecosystem.config.js \
+    ecosystem.config.cjs \
     public \
     data \
     $SERVER:$REMOTE_DIR/
@@ -149,7 +149,7 @@ else
     dist \
     package.json \
     package-lock.json \
-    ecosystem.config.js \
+    ecosystem.config.cjs \
     public \
     data \
     $SERVER:$REMOTE_DIR/
@@ -163,7 +163,7 @@ ssh $SSH_OPTS $SERVER "$NVM_SOURCE && cd $REMOTE_DIR && npm install --omit=dev -
 # 5. Restart the app with PM2
 echo ""
 echo "🔄 Restarting application..."
-ssh $SSH_OPTS $SERVER "$NVM_SOURCE && cd $REMOTE_DIR && pm2 restart $APP_NAME 2>/dev/null || pm2 start ecosystem.config.js"
+ssh $SSH_OPTS $SERVER "$NVM_SOURCE && cd $REMOTE_DIR && pm2 restart $APP_NAME 2>/dev/null || pm2 start ecosystem.config.cjs"
 
 # 6. Save PM2 process list
 ssh $SSH_OPTS $SERVER "$NVM_SOURCE && pm2 save"

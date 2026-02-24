@@ -3,7 +3,7 @@
  * These tests use mocks and don't require actual GitHub Copilot authentication
  */
 
-import { CopilotService } from './copilot-service';
+import { CopilotService } from './copilot-service.js';
 
 // Mock the @github/copilot-sdk module
 jest.mock('@github/copilot-sdk', () => {

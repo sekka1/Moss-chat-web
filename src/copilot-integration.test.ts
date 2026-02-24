@@ -18,7 +18,7 @@
  * 3. Display the response for manual verification
  */
 
-import { CopilotService } from './copilot-service';
+import { CopilotService } from './copilot-service.js';
 
 async function runIntegrationTest(): Promise<void> {
   console.log('=== GitHub Copilot SDK Integration Test ===\n');
