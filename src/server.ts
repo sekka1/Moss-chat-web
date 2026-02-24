@@ -1,14 +1,21 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import cookieParser from 'cookie-parser';
 import { KnowledgeService } from './knowledge-service.js';
 import { CopilotService } from './copilot-service.js';
+import { createAuthRouter } from './auth-routes.js';
+import { requireAuth } from './auth-middleware.js';
+import { closeDb } from './db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Trust first proxy (Apache terminates SSL on Bitnami)
+app.set('trust proxy', 1);
 
 // Initialize Copilot service
 const copilotService = new CopilotService();
@@ -21,7 +28,32 @@ const knowledgeService = new KnowledgeService(
 
 // Middleware
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(cookieParser());
+
+// Auth routes (login, logout, status) — must be before static/protected routes
+app.use(createAuthRouter());
+
+// Serve login page without auth
+app.get('/login.html', (_req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '../public/login.html'));
+});
+
+// Protect the main chat page — redirect to login if not authenticated
+app.get('/', (req: Request, res: Response) => {
+  const token = req.cookies?.moss_session as string | undefined;
+  if (!token) {
+    res.redirect('/login.html');
+    return;
+  }
+  // Let the frontend verify with /api/auth/status for a smoother UX;
+  // this server-side check catches the obvious no-cookie case.
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+// Serve static assets (CSS, JS, images) without auth
+app.use(express.static(path.join(__dirname, '../public'), {
+  index: false, // Don't auto-serve index.html — we handle '/' above
+}));
 
 /**
  * Interface for chat message
@@ -54,7 +86,7 @@ copilotService.initialize().catch((error) => {
  * @param req - Express request with chat message
  * @param res - Express response with AI response (streaming or complete)
  */
-app.post('/api/chat', async (req: Request<object, ChatResponse, ChatMessage>, res: Response) => {
+app.post('/api/chat', requireAuth, async (req: Request<object, ChatResponse, ChatMessage>, res: Response) => {
   const { message } = req.body;
 
   if (!message || typeof message !== 'string') {
@@ -107,7 +139,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
  * @param req - Express request with chat message
  * @param res - Express response with streaming AI response
  */
-app.post('/api/chat/stream', async (req: Request<object, unknown, ChatMessage>, res: Response) => {
+app.post('/api/chat/stream', requireAuth, async (req: Request<object, unknown, ChatMessage>, res: Response) => {
   const { message } = req.body;
 
   if (!message || typeof message !== 'string') {
@@ -173,6 +205,7 @@ app.listen(PORT, () => {
 process.on('SIGTERM', async () => {
   // eslint-disable-next-line no-console
   console.log('SIGTERM received, shutting down gracefully...');
+  closeDb();
   await copilotService.shutdown();
   process.exit(0);
 });
@@ -180,6 +213,7 @@ process.on('SIGTERM', async () => {
 process.on('SIGINT', async () => {
   // eslint-disable-next-line no-console
   console.log('SIGINT received, shutting down gracefully...');
+  closeDb();
   await copilotService.shutdown();
   process.exit(0);
 });

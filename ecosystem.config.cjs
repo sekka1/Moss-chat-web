@@ -21,6 +21,10 @@ module.exports = {
         // with COPILOT_GITHUB_TOKEN=ghp_xxxxx
         // Or export it before pm2 start
         COPILOT_GITHUB_TOKEN: process.env.COPILOT_GITHUB_TOKEN || '',
+        // Auth: JWT signing secret (required — generate with: openssl rand -hex 32)
+        SESSION_SECRET: process.env.SESSION_SECRET || '',
+        // Auth: SQLite database path
+        AUTH_DB_PATH: '/opt/bitnami/apps/moss-chat/data/auth.db',
       },
       // Logging
       error_file: '/opt/bitnami/apps/moss-chat/logs/error.log',
