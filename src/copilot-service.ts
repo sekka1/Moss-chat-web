@@ -46,10 +46,13 @@ export class CopilotService {
     }
 
     try {
+      // System instruction for detailed, comprehensive responses
+      const systemInstruction = 'You are a helpful and knowledgeable moss wall expert. Provide detailed, comprehensive answers with specific tips, care instructions, and explanations. Aim for thorough responses that fully address the question.';
+
       // Build enhanced prompt with knowledge base context if available
       const enhancedPrompt = context
-        ? `Using the following context from the knowledge base:\n\n${context}\n\nPlease answer this question: ${prompt}`
-        : prompt;
+        ? `${systemInstruction}\n\nUsing the following context from the knowledge base:\n\n${context}\n\nPlease provide a detailed answer to this question: ${prompt}`
+        : `${systemInstruction}\n\nPlease provide a detailed answer to this question: ${prompt}`;
 
       // Create a session with GPT-4
       const session = await this.client.createSession({ model: 'gpt-4.1' });
@@ -91,10 +94,13 @@ export class CopilotService {
     }
 
     try {
+      // System instruction for detailed, comprehensive responses
+      const systemInstruction = 'You are a helpful and knowledgeable moss wall expert. Provide detailed, comprehensive answers with specific tips, care instructions, and explanations. Aim for thorough responses that fully address the question.';
+
       // Build enhanced prompt with knowledge base context if available
       const enhancedPrompt = context
-        ? `Using the following context from the knowledge base:\n\n${context}\n\nPlease answer this question: ${prompt}`
-        : prompt;
+        ? `${systemInstruction}\n\nUsing the following context from the knowledge base:\n\n${context}\n\nPlease provide a detailed answer to this question: ${prompt}`
+        : `${systemInstruction}\n\nPlease provide a detailed answer to this question: ${prompt}`;
 
       // Create a session with GPT-4
       const session = await this.client.createSession({ model: 'gpt-4.1' });
