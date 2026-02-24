@@ -165,7 +165,74 @@
         .messages-area::-webkit-scrollbar-thumb:hover {
             background: #4e4e52;
         }
+
+        /* Markdown content styling inside AI messages */
+        .message.ai h1, .message.ai h2, .message.ai h3 {
+            color: #e0e0e0;
+            margin: 0.75rem 0 0.5rem 0;
+        }
+
+        .message.ai h1 { font-size: 1.3rem; }
+        .message.ai h2 { font-size: 1.15rem; }
+        .message.ai h3 { font-size: 1.05rem; }
+
+        .message.ai p {
+            margin: 0.5rem 0;
+        }
+
+        .message.ai ul, .message.ai ol {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .message.ai li {
+            margin: 0.25rem 0;
+        }
+
+        .message.ai strong {
+            color: #e0e0e0;
+        }
+
+        .message.ai code {
+            background-color: #1e1e1e;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .message.ai pre {
+            background-color: #1e1e1e;
+            padding: 0.75rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+        }
+
+        .message.ai pre code {
+            padding: 0;
+            background: none;
+        }
+
+        .message.ai blockquote {
+            border-left: 3px solid #0e639c;
+            padding-left: 0.75rem;
+            margin: 0.5rem 0;
+            color: #a0a0a0;
+        }
+
+        .message.ai > *:first-child {
+            margin-top: 0;
+        }
+
+        .message.ai > *:last-child {
+            margin-bottom: 0;
+        }
     </style>
+    <!-- Markdown renderer for AI responses -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Sanitize HTML to prevent XSS -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
 </head>
 <body>
     <div class="header">
@@ -195,6 +262,14 @@
 
     <script>
         const messagesArea = document.getElementById('messagesArea');
+
+        // Configure marked with safe defaults
+        if (typeof marked !== 'undefined') {
+            marked.setOptions({
+                breaks: true,
+                gfm: true
+            });
+        }
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
 
@@ -229,7 +304,17 @@
 
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${type}`;
-            messageDiv.textContent = text;
+
+            if (type === 'ai' && typeof marked !== 'undefined') {
+                // Render markdown for AI responses, sanitized for XSS safety
+                const rawHtml = marked.parse(text);
+                messageDiv.innerHTML = typeof DOMPurify !== 'undefined'
+                    ? DOMPurify.sanitize(rawHtml)
+                    : rawHtml;
+            } else {
+                messageDiv.textContent = text;
+            }
+
             messagesArea.appendChild(messageDiv);
 
             // Scroll to bottom
