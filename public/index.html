@@ -24,12 +24,31 @@
             background-color: #252526;
             padding: 1rem 1.5rem;
             border-bottom: 1px solid #3e3e42;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .header h1 {
             font-size: 1.5rem;
             font-weight: 600;
             color: #cccccc;
+        }
+
+        .logout-button {
+            background-color: transparent;
+            color: #858585;
+            border: 1px solid #3e3e42;
+            padding: 0.4rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .logout-button:hover {
+            color: #d4d4d4;
+            border-color: #858585;
         }
 
         .chat-container {
@@ -237,6 +256,7 @@
 <body>
     <div class="header">
         <h1>Moss Chat</h1>
+        <button class="logout-button" id="logoutButton">Sign Out</button>
     </div>
 
     <div class="chat-container">
@@ -261,6 +281,27 @@
     </div>
 
     <script>
+        // Auth check — redirect to login if not authenticated
+        fetch('/api/auth/status')
+            .then(res => {
+                if (!res.ok) {
+                    window.location.href = '/login.html';
+                }
+            })
+            .catch(() => {
+                window.location.href = '/login.html';
+            });
+
+        // Logout handler
+        document.getElementById('logoutButton').addEventListener('click', async () => {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+            } catch (e) {
+                // Ignore network errors during logout
+            }
+            window.location.href = '/login.html';
+        });
+
         const messagesArea = document.getElementById('messagesArea');
 
         // Configure marked with safe defaults
@@ -386,6 +427,10 @@
                 });
 
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        window.location.href = '/login.html';
+                        return;
+                    }
                     throw new Error('Failed to get response from server');
                 }
 

@@ -133,12 +133,16 @@ if [[ "$CI_MODE" == true ]]; then
     --exclude '.git' \
     --exclude 'screenshots' \
     --exclude '*.log' \
+    --exclude 'data/*.db' \
+    --exclude 'data/*.db-wal' \
+    --exclude 'data/*.db-shm' \
     dist \
     package.json \
     package-lock.json \
     ecosystem.config.cjs \
     public \
     data \
+    scripts \
     $SERVER:$REMOTE_DIR/
 else
   rsync -avz --delete \
@@ -146,12 +150,16 @@ else
     --exclude '.git' \
     --exclude 'screenshots' \
     --exclude '*.log' \
+    --exclude 'data/*.db' \
+    --exclude 'data/*.db-wal' \
+    --exclude 'data/*.db-shm' \
     dist \
     package.json \
     package-lock.json \
     ecosystem.config.cjs \
     public \
     data \
+    scripts \
     $SERVER:$REMOTE_DIR/
 fi
 
@@ -160,12 +168,34 @@ echo ""
 echo "📥 Installing production dependencies..."
 ssh $SSH_OPTS $SERVER "$NVM_SOURCE && cd $REMOTE_DIR && npm install --omit=dev --engine-strict=false"
 
-# 5. Restart the app with PM2
+# 5. Auto-seed users if database doesn't exist
+echo ""
+echo "🔐 Checking auth database..."
+ssh $SSH_OPTS $SERVER "$NVM_SOURCE && cd $REMOTE_DIR && if [ ! -f data/auth.db ]; then echo 'Database not found — seeding users...' && npx tsx scripts/seed-users.ts; else echo 'Auth database already exists — skipping seed.'; fi"
+
+# 6. Persist SESSION_SECRET on the server so manual PM2 restarts pick it up
+echo ""
+echo "🔑 Configuring session secret..."
+if [[ -n "${SESSION_SECRET:-}" ]]; then
+  ssh $SSH_OPTS $SERVER "cd $REMOTE_DIR && \
+    touch .env && \
+    if grep -q '^SESSION_SECRET=' .env 2>/dev/null; then \
+      sed -i 's|^SESSION_SECRET=.*|SESSION_SECRET=${SESSION_SECRET}|' .env; \
+    else \
+      echo 'SESSION_SECRET=${SESSION_SECRET}' >> .env; \
+    fi && \
+    chmod 600 .env && \
+    echo 'SESSION_SECRET written to .env'"
+else
+  echo "⚠️  SESSION_SECRET not set — skipping .env update"
+fi
+
+# 7. Restart the app with PM2 (pass SESSION_SECRET)
 echo ""
 echo "🔄 Restarting application..."
-ssh $SSH_OPTS $SERVER "$NVM_SOURCE && cd $REMOTE_DIR && (pm2 describe $APP_NAME > /dev/null 2>&1 && pm2 restart $APP_NAME --update-env || pm2 start ecosystem.config.cjs)"
+ssh $SSH_OPTS $SERVER "$NVM_SOURCE && cd $REMOTE_DIR && export SESSION_SECRET='${SESSION_SECRET:-}' && (pm2 describe $APP_NAME > /dev/null 2>&1 && pm2 restart $APP_NAME --update-env || pm2 start ecosystem.config.cjs)"
 
-# 6. Save PM2 process list
+# 8. Save PM2 process list
 ssh $SSH_OPTS $SERVER "$NVM_SOURCE && pm2 save"
 
 echo ""

@@ -50,6 +50,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           AWS_REGION: ${{ env.AWS_REGION }}
           LIGHTSAIL_INSTANCE_NAME: ${{ env.LIGHTSAIL_INSTANCE_NAME }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
         run: |
           chmod +x ./scripts/deploy.sh
           ./scripts/deploy.sh --ci

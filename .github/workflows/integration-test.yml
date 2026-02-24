@@ -42,7 +42,12 @@ jobs:
           # Install Copilot CLI extension
           gh extension install github/gh-copilot || true
 
-      - name: Run integration tests
+      - name: Run unit & auth integration tests
+        env:
+          SESSION_SECRET: ci-test-secret-not-for-production
+        run: npx jest --verbose
+
+      - name: Run Copilot SDK integration test
         env:
           # Authentication for GitHub Copilot SDK
           # The SDK checks these environment variables in order:
@@ -69,4 +74,5 @@ jobs:
           path: |
             *.log
             npm-debug.log*
+            data/*.db
           retention-days: 7
