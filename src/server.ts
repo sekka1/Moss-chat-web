@@ -1,6 +1,5 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import cookieParser from 'cookie-parser';
 import { KnowledgeService } from './knowledge-service.js';
 import { CopilotService } from './copilot-service.js';
@@ -8,8 +7,8 @@ import { createAuthRouter } from './auth-routes.js';
 import { requireAuth } from './auth-middleware.js';
 import { closeDb } from './db.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Use process.cwd() so the file works in both ESM (production) and CommonJS (ts-jest)
+const projectRoot = process.cwd();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,7 +21,7 @@ const copilotService = new CopilotService();
 
 // Initialize knowledge service with Copilot service for enhanced semantic search
 const knowledgeService = new KnowledgeService(
-  path.join(__dirname, '../data'),
+  path.join(projectRoot, 'data'),
   copilotService
 );
 
@@ -35,7 +34,7 @@ app.use(createAuthRouter());
 
 // Serve login page without auth
 app.get('/login.html', (_req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, '../public/login.html'));
+  res.sendFile(path.join(projectRoot, 'public/login.html'));
 });
 
 // Protect the main chat page — redirect to login if not authenticated
@@ -47,11 +46,11 @@ app.get('/', (req: Request, res: Response) => {
   }
   // Let the frontend verify with /api/auth/status for a smoother UX;
   // this server-side check catches the obvious no-cookie case.
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+  res.sendFile(path.join(projectRoot, 'public/index.html'));
 });
 
 // Serve static assets (CSS, JS, images) without auth
-app.use(express.static(path.join(__dirname, '../public'), {
+app.use(express.static(path.join(projectRoot, 'public'), {
   index: false, // Don't auto-serve index.html — we handle '/' above
 }));
 
@@ -191,12 +190,20 @@ app.post('/api/chat/stream', requireAuth, async (req: Request<object, unknown, C
 });
 
 /**
- * Start the Express server
+ * Export the Express app for testing with supertest
  */
-app.listen(PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+export { app };
+
+/**
+ * Start the Express server (only when run directly, not when imported for tests)
+ */
+const isMainModule = process.argv[1]?.endsWith('server.js') || process.argv[1]?.endsWith('server.ts');
+if (isMainModule) {
+  app.listen(PORT, () => {
+    // eslint-disable-next-line no-console
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
 
 /**
  * Graceful shutdown handling
