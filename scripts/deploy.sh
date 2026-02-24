@@ -22,6 +22,9 @@ APP_NAME="moss-chat"
 LIGHTSAIL_INSTANCE_NAME="${LIGHTSAIL_INSTANCE_NAME:-WordPress-1}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
 
+# nvm must be sourced in non-interactive SSH sessions
+NVM_SOURCE='export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"'
+
 # Parse arguments
 CI_MODE=false
 RUNNER_IP=""
@@ -155,15 +158,15 @@ fi
 # 4. Install dependencies on server
 echo ""
 echo "📥 Installing production dependencies..."
-ssh $SSH_OPTS $SERVER "cd $REMOTE_DIR && npm install --omit=dev --engine-strict=false"
+ssh $SSH_OPTS $SERVER "$NVM_SOURCE && cd $REMOTE_DIR && npm install --omit=dev --engine-strict=false"
 
 # 5. Restart the app with PM2
 echo ""
 echo "🔄 Restarting application..."
-ssh $SSH_OPTS $SERVER "cd $REMOTE_DIR && pm2 restart $APP_NAME 2>/dev/null || pm2 start ecosystem.config.js"
+ssh $SSH_OPTS $SERVER "$NVM_SOURCE && cd $REMOTE_DIR && pm2 restart $APP_NAME 2>/dev/null || pm2 start ecosystem.config.js"
 
 # 6. Save PM2 process list
-ssh $SSH_OPTS $SERVER "pm2 save"
+ssh $SSH_OPTS $SERVER "$NVM_SOURCE && pm2 save"
 
 echo ""
 echo "✅ Deployment complete!"
