@@ -14,7 +14,7 @@ The GitHub Copilot SDK exposes the same engine behind Copilot CLI: a production-
 ## Prerequisites
 
 1. **GitHub Copilot CLI** installed and authenticated ([Installation guide](https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli))
-2. **Language runtime**: Node.js 18+, Python 3.8+, Go 1.21+, or .NET 8.0+
+2. **Language runtime**: Node.js 24+, Python 3.8+, Go 1.21+, or .NET 8.0+
 
 Verify CLI: `copilot --version`
 

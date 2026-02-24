@@ -36,7 +36,7 @@ moss-chat-web/
 
 ## Prerequisites
 
-- Node.js >= 18.0.0
+- Node.js >= 24.0.0
 - npm, pnpm, or yarn
 - GitHub Copilot subscription and CLI configured (required for AI functionality)
 
@@ -263,7 +263,7 @@ The project includes GitHub Actions workflows that automatically run on every pu
 - **Linting**: Ensures code quality and TypeScript standards
 - **Building**: Verifies the application compiles successfully
 - **Testing**: Runs the unit test suite (uses mocks, no authentication required)
-- **Multi-version**: Tests against Node.js 18.x and 20.x
+- **Multi-version**: Tests against Node.js 24.x
 
 ### Integration Test Workflow (`.github/workflows/integration-test.yml`)
 
