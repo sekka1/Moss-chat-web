@@ -8,7 +8,14 @@ module.exports = {
     'copilot-integration.test.ts', // Exclude integration test (run manually)
   ],
   transform: {
-    '^.+\\.ts$': 'ts-jest',
+    '^.+\\.ts$': ['ts-jest', {
+      useESM: false,
+      tsconfig: {
+        module: 'commonjs',
+        moduleResolution: 'node',
+        verbatimModuleSyntax: false,
+      },
+    }],
   },
   collectCoverageFrom: [
     'src/**/*.ts',
