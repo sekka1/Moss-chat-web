@@ -95,16 +95,16 @@ if [[ "$CI_MODE" == true ]]; then
   echo "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/deploy_key
   chmod 600 ~/.ssh/deploy_key
   
-  # Add server to known hosts
-  ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-  
   # Use the deploy key for SSH
   export SSH_KEY_PATH="$HOME/.ssh/deploy_key"
   SSH_OPTS="-i $SSH_KEY_PATH -o StrictHostKeyChecking=no"
   
-  # Wait a moment for firewall rule to propagate
+  # Wait for firewall rule to propagate before attempting SSH
   echo "⏳ Waiting for firewall rule to propagate..."
-  sleep 5
+  sleep 10
+  
+  # Add server to known hosts (|| true to prevent set -e from killing script)
+  ssh-keyscan -H "$SERVER_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
 else
   echo "💻 Running in local mode..."
   SSH_OPTS=""
