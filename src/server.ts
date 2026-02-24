@@ -195,10 +195,10 @@ app.post('/api/chat/stream', requireAuth, async (req: Request<object, unknown, C
 export { app };
 
 /**
- * Start the Express server (only when run directly, not when imported for tests)
+ * Start the Express server (skip when imported by Jest for testing)
+ * JEST_WORKER_ID is set automatically by Jest in every worker process.
  */
-const isMainModule = process.argv[1]?.endsWith('server.js') || process.argv[1]?.endsWith('server.ts');
-if (isMainModule) {
+if (!process.env.JEST_WORKER_ID) {
   app.listen(PORT, () => {
     // eslint-disable-next-line no-console
     console.log(`Server is running on http://localhost:${PORT}`);
