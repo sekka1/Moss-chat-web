@@ -20,10 +20,18 @@ moss-chat-web/
 ├── src/
 │   ├── server.ts              # Express server with API endpoints
 │   ├── copilot-service.ts     # GitHub Copilot SDK wrapper
-│   └── knowledge-service.ts   # Knowledge base search service
+│   ├── knowledge-service.ts   # Knowledge base search service
+│   ├── auth-service.ts        # Login verification, JWT tokens
+│   ├── auth-middleware.ts     # requireAuth middleware, rate limiter
+│   ├── auth-routes.ts         # Login/logout/status API routes
+│   └── db.ts                  # SQLite database layer
 ├── public/
-│   └── index.html             # Chat interface UI
+│   ├── index.html             # Chat interface UI
+│   └── login.html             # Login page
 ├── data/                      # Knowledge base documents
+├── scripts/
+│   ├── deploy.sh              # Deployment script
+│   └── seed-users.ts          # Database user seeding script
 ├── .github/
 │   └── workflows/
 │       └── lint-and-build.yml  # CI/CD pipeline
@@ -65,6 +73,63 @@ gh copilot login
 ```
 
 Note: The application requires an active GitHub Copilot subscription. If Copilot is not available, the application will provide fallback responses with knowledge base context.
+
+### 4. Configure Authentication
+
+The app requires a `SESSION_SECRET` for signing JWT session tokens. Generate one:
+
+```bash
+openssl rand -hex 32
+```
+
+This produces a 64-character hex string like `a3f1b9c2e4...`.
+
+#### Local development
+
+Set it as an environment variable before starting the server:
+
+```bash
+export SESSION_SECRET="<your-generated-secret>"
+npm run dev
+```
+
+Or create a `.env` file (already in `.gitignore`):
+
+```
+SESSION_SECRET=<your-generated-secret>
+```
+
+#### Production (GitHub Actions → server)
+
+The deploy pipeline automatically passes `SESSION_SECRET` from GitHub Actions secrets to the server via PM2:
+
+1. **Add `SESSION_SECRET` as a GitHub repository secret**:
+   - Go to your repository → Settings → Secrets and variables → Actions
+   - Click "New repository secret"
+   - Name: `SESSION_SECRET`
+   - Value: Paste the output of `openssl rand -hex 32`
+   - Click "Add secret"
+
+2. The deploy script (`scripts/deploy.sh`) automatically:
+   - Passes the secret to the PM2 process on every deploy
+   - Writes it to `/opt/bitnami/apps/moss-chat/.env` on the server so it persists across manual PM2 restarts
+   - Seeds the user database on first deploy (prints passwords to the deploy log)
+
+> **⚠️ Important:** Use the **same** `SESSION_SECRET` value in GitHub secrets and on the server. Changing it will invalidate all existing user sessions.
+
+### 5. Seed Users
+
+On first deploy, users are auto-seeded. To seed manually (local development):
+
+```bash
+npm run seed
+```
+
+This creates two users with random passwords and prints them to stdout:
+- `ci-system@gmail.com` — for CI/automated use
+- `garlandk@gmail.com` — for regular use
+
+> **⚠️ Save the passwords immediately** — they cannot be recovered. To reset, delete `data/auth.db` and re-run the seed.
 
 ## Development
 
@@ -343,16 +408,27 @@ MIT
 
 ## Environment Variables
 
-- `PORT`: Server port (default: 3000)
-- GitHub Copilot authentication is handled via the GitHub CLI (`gh copilot login`)
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `PORT` | No | `3000` | Server port |
+| `SESSION_SECRET` | **Yes** | — | JWT signing secret. Generate with `openssl rand -hex 32` |
+| `AUTH_DB_PATH` | No | `./data/auth.db` | Path to the SQLite user database |
+| `COPILOT_GITHUB_TOKEN` | Yes (prod) | — | GitHub Copilot authentication token |
+| `NODE_ENV` | No | — | Set to `production` for secure cookies |
+
+GitHub Copilot authentication is handled via the GitHub CLI (`gh copilot login`) in development, or via `COPILOT_GITHUB_TOKEN` in production.
 
 ## Security
 
 This application implements security best practices:
 
-- Input validation on API endpoints
-- No hardcoded secrets
-- Content Security Policy headers ready for implementation
-- Safe HTML rendering (no XSS vulnerabilities)
+- **Authentication**: Login required — JWT in HTTP-only, Secure, SameSite=Strict cookies (30-day expiry)
+- **Password handling**: Passwords are SHA-256 hashed client-side before transmission, then argon2-hashed server-side for storage — plaintext passwords never travel over the wire or touch the server
+- **Rate limiting**: Login endpoint limited to 10 attempts per 15 minutes per IP
+- **Timing-safe**: User enumeration protection (constant-time response for invalid users)
+- **Input validation** on all API endpoints
+- **No hardcoded secrets** — all credentials via environment variables
+- **XSS prevention**: DOMPurify sanitization on rendered content
+- **SQLite database** excluded from version control and deployments
 
 For detailed security guidelines, see [AGENTS.md](./AGENTS.md).
