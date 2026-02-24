@@ -155,7 +155,7 @@ fi
 # 4. Install dependencies on server
 echo ""
 echo "📥 Installing production dependencies..."
-ssh $SSH_OPTS $SERVER "cd $REMOTE_DIR && npm install --production"
+ssh $SSH_OPTS $SERVER "cd $REMOTE_DIR && npm install --omit=dev --engine-strict=false"
 
 # 5. Restart the app with PM2
 echo ""
