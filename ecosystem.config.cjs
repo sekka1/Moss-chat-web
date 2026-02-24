@@ -15,6 +15,12 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 3000,
+        // GitHub Copilot SDK authentication
+        // Set this on the server: pm2 env 0 will show current env vars
+        // To set: create a .env file at /opt/bitnami/apps/moss-chat/.env
+        // with COPILOT_GITHUB_TOKEN=ghp_xxxxx
+        // Or export it before pm2 start
+        COPILOT_GITHUB_TOKEN: process.env.COPILOT_GITHUB_TOKEN || '',
       },
       // Logging
       error_file: '/opt/bitnami/apps/moss-chat/logs/error.log',

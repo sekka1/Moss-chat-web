@@ -8,7 +8,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  LIGHTSAIL_INSTANCE_NAME: WordPress-1
+  LIGHTSAIL_INSTANCE_NAME: WordPress-2
 
 jobs:
   deploy:

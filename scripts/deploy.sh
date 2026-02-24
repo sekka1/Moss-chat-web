@@ -19,7 +19,7 @@ SERVER_HOST="54.161.78.100"
 SERVER="${SERVER_USER}@${SERVER_HOST}"
 REMOTE_DIR="/opt/bitnami/apps/moss-chat"
 APP_NAME="moss-chat"
-LIGHTSAIL_INSTANCE_NAME="${LIGHTSAIL_INSTANCE_NAME:-WordPress-1}"
+LIGHTSAIL_INSTANCE_NAME="${LIGHTSAIL_INSTANCE_NAME:-WordPress-2}"
 AWS_REGION="${AWS_REGION:-us-east-1}"
 
 # nvm must be sourced in non-interactive SSH sessions
